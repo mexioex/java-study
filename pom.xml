@@ -14,7 +14,6 @@
         <module>design-pattern</module>
         <module>data-structure</module>
         <module>algorithm</module>
-        <module>leecode</module>
         <module>jvm</module>
     </modules>
 

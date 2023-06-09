@@ -38,6 +38,12 @@ b+=1;// 正常运行
 只有这写类型可以用于 switch 表达式,因为 switch 对应的 JVM 指令是 lookupswitch,tableswitch,这些指令只支持 int,String 在
 switch 中本质只是一种语法糖,实际是用的 String 的 hashCode
 
+### boolean到底占几个字节
+
+- boolean 逻辑上只占1位即可,实际 JVM 底层没有 boolean 的操作指令,所以按 int 处理
+- boolean 变量按 int 处理,boolean 数组按 byte 处理
+- 不同的 JVM 实现可能有不同的标准
+
 ## 流程控制语句
 
 - switch 中,continue,break,yield无法结束循环

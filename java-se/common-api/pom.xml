@@ -5,19 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>java.study</groupId>
-        <artifactId>java-study</artifactId>
+        <artifactId>java-se</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
+    <artifactId>common-api</artifactId>
     <packaging>pom</packaging>
-
-    <artifactId>java-se</artifactId>
-
     <modules>
-        <module>base</module>
-        <module>logical-operation</module>
-        <module>oop</module>
-        <module>common-api</module>
+        <module>system-api</module>
     </modules>
 
     <properties>
@@ -25,4 +20,5 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
 </project>

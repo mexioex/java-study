@@ -5,21 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>java.study</groupId>
-        <artifactId>java-se</artifactId>
+        <artifactId>oop</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>oop</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>oop-base</module>
-        <module>oop-static</module>
-        <module>oop-extends</module>
-        <module>oop-polymorphic</module>
-        <module>oop-interface</module>
-        <module>oop-abstract</module>
-        <module>oop-inner-class</module>
-    </modules>
+    <artifactId>oop-inner-class</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

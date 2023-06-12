@@ -17,7 +17,6 @@
         <module>base</module>
         <module>logical-operation</module>
         <module>oop</module>
-        <module>common-api</module>
     </modules>
 
     <properties>

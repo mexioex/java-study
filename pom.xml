@@ -17,6 +17,7 @@
         <module>jvm</module>
         <module>design-pattern/behavioral-pattern</module>
         <module>design-pattern/behavioral-pattern/chain-of-responsibility-pattern</module>
+        <module>design-pattern/Interpreter-pattern</module>
     </modules>
 
     <properties>

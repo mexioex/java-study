@@ -13,6 +13,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>creational-pattern</module>
+        <module>behavioral-pattern</module>
     </modules>
 
     <properties>

@@ -10,11 +10,14 @@
     </parent>
 
     <artifactId>behavioral-pattern</artifactId>
+    <modules>
+        <module>chain-of-responsibility-pattern</module>
+        <module>command-pattern</module>
+        <module>interceptor-pattern</module>
+    </modules>
 
     <packaging>pom</packaging>
-    <modules>
-        <module>command-pattern</module>
-    </modules>
+
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

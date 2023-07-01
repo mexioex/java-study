@@ -9,24 +9,6 @@ import data.structure.AbstractTree;
  * @date 2023-06-26
  */
 public class BinarySearchTree<K extends Comparable<K>, V> extends AbstractTree<K, V> {
-
-    @Override
-    protected Node<K, V> getNode(K key) {
-        Node<K, V> node = root;
-        while (node != null) {
-            int comparedTo = key.compareTo(node.key);
-            switch (comparedTo) {
-                case -1 -> node = node.left;
-                case 0 -> {
-                    return node;
-                }
-                case 1 -> node = node.right;
-                default -> throw new IllegalStateException("state: " + comparedTo);
-            }
-        }
-        return null;
-    }
-
     /**
      * 获取树中最大值
      *

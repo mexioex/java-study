@@ -12,6 +12,7 @@ public class AVLTree<K extends Comparable<K>, V> extends AbstractTree<K, V> {
     @Override
     public void put(K key, V value) {
         root = doPut(root, key, value);
+        size++;
     }
 
     /**
@@ -52,6 +53,7 @@ public class AVLTree<K extends Comparable<K>, V> extends AbstractTree<K, V> {
             return null;
         }
         root = doRemove(root, key);
+        size--;
         return node.value;
     }
 

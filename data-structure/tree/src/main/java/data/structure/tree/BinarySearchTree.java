@@ -106,6 +106,7 @@ public class BinarySearchTree<K extends Comparable<K>, V> extends AbstractTree<K
         } else {
             parent.right = new Node<>(key, value);
         }
+        size++;
     }
 
     @Override
@@ -154,6 +155,7 @@ public class BinarySearchTree<K extends Comparable<K>, V> extends AbstractTree<K
             shift(parent, p, sub);
             sub.left = p.left;
         }
+        size--;
         return p.value;
     }
 

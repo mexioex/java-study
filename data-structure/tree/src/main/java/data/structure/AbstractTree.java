@@ -117,7 +117,7 @@ public abstract class AbstractTree<K extends Comparable<K>, V> implements Tree<K
      * 红黑树颜色枚举
      */
     protected enum Color {
-        RED, BLACK;
+        RED, BLACK
     }
 
     /**
@@ -194,7 +194,7 @@ public abstract class AbstractTree<K extends Comparable<K>, V> implements Tree<K
          *
          * @return 如果当前是左孩子返回父节点的右孩子, 如果当前是右孩子返回父节点的左孩子
          */
-       public Node<K, V> getSibling() {
+        public Node<K, V> getSibling() {
             if (parent == null) {
                 return null;
             }

@@ -562,7 +562,7 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
             // 最多孩子数等于最小度*2
             this.children = (Node<K, V>[]) new Node<?, ?>[2 * degree];
             // 关键字数比孩子少1
-            this.keys = (K[]) new Object[2 * degree - 1];
+            this.keys = (K[]) new Comparable[2 * degree - 1];
             // 关键字数比孩子少1
             this.values = (V[]) new Object[2 * degree - 1];
         }

@@ -163,6 +163,6 @@ public abstract class AbstractHeap<E extends Comparable<E>> implements Heap<E> {
 
     @SuppressWarnings("all")
     public AbstractHeap(int capacity) {
-        this.array = (E[]) new Object[capacity];
+        this.array = (E[]) new Comparable[capacity];
     }
 }

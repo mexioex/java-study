@@ -5,12 +5,12 @@ import data.structure.Tree;
 import java.util.Arrays;
 
 /**
- * B-树实现
+ * B+树实现
  *
  * @author mexioex
  * @date 2023-07-02
  */
-public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
+public class BPlusTree<K extends Comparable<K>, V> implements Tree<K, V> {
     /**
      * 树的最小度
      */
@@ -30,6 +30,11 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
      * 最大孩子数量 2 * degree -1
      */
     final int MAX_KEY_NUM;
+
+    /**
+     * 哨兵节点
+     */
+    private final LeafNode<K, V> sentinel;
 
     /**
      * 判断 key 是否存在
@@ -59,13 +64,10 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
     private void doPut(Node<K, V> node, K key, Node<K, V> parent, int index, V value) {
         int i = 0;
         while (i < node.keyNum) {
-            if (node.keys[i] == null) {
-                break;
-            }
             int comparedTo = node.keys[i].compareTo(key);
             // 更新
             if (comparedTo == 0) {
-                node.set(i, value);
+                // 如果是叶子节点直接更新.叶子节点的 value.不相等就去它的孩子中
                 return;
             }
             if (comparedTo > 0) {
@@ -76,7 +78,59 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
         }
         // 如果是叶子节点
         if (node.leaf) {
-            node.put(key, i, value);
+            LeafNode<K, V> kvLeafNode = new LeafNode<>(null, null, key, value);
+            node.put(key, i);
+            node.leafNode = kvLeafNode;
+            // 如果parent是null,没有上级节点了
+            if (i == 0) {
+                if (parent == null) {
+                    kvLeafNode.prev = sentinel;
+                    sentinel.next = kvLeafNode;
+                }
+                if (parent != null) {
+                    Node<K, V>[] children = parent.children;
+                    int parentSiblingIndex = 0;
+                    while (parentSiblingIndex < children.length) {
+                        if (children[parentSiblingIndex] == node) {
+                            break;
+                        }
+                        parentSiblingIndex++;
+                    }
+                    LeafNode<K, V> leafNode = children[parentSiblingIndex].leafNode;
+                    while (leafNode != null) {
+                        if (leafNode.key.compareTo(key) > 0) {
+                            break;
+                        }
+                        leafNode = leafNode.next;
+                    }
+                    kvLeafNode.prev = leafNode;
+                    LeafNode<K, V> next = leafNode.next;
+                    kvLeafNode.next = next;
+                    next.prev = kvLeafNode;
+                }
+            } else {
+                // 从哨兵节点找到 第一个大于 key 的节点前面插入
+                Node<K, V> leftSibling = node.leftSibling(index);
+                assert leftSibling != null;
+                LeafNode<K, V> start = leftSibling.leafNode;
+                while (start != null) {
+                    if (start.key.compareTo(key) > 0) {
+                        break;
+                    }
+                    start = start.next;
+                }
+                if (start != null) {
+                    // 找到了
+                    kvLeafNode.prev = start;
+                    LeafNode<K, V> next = start.next;
+                    kvLeafNode.next = next;
+                    next.prev = kvLeafNode;
+                } else {
+                    // 没找到
+                    kvLeafNode.prev = sentinel;
+                    sentinel.next = kvLeafNode;
+                }
+            }
         } else {
             // 如果不是非叶子节点，需要在 children[i] 出开始进行递归插入
             doPut(node.children[i], key, node, i, value);
@@ -115,8 +169,6 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
         right.leaf = left.leaf;
         // 将 left 的中 degree-1 后面的 key 拷贝到 right 中
         System.arraycopy(left.keys, degree, right.keys, 0, degree - 1);
-        // 将 left 的中 degree-1 后面的 value 拷贝到 right 中
-        System.arraycopy(left.values, degree, right.values, 0, degree - 1);
         // 如果不是叶子节点,需要将孩子节点拷贝过去
         if (!left.leaf) {
             // 将 left 的中 degree-1 后面的 child 拷贝到 right 中
@@ -127,8 +179,7 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
         left.keyNum = degree - 1;
         // 2.degree -1 处的 key 插入到 parent 的 index 处, index 指 left 作为孩子时的索引
         K key = left.keys[degree - 1];
-        V value = left.values[degree - 1];
-        parent.put(key, index, value);
+        parent.put(key, index);
         // 3. right 节点作为 parent 的孩子插入到 index +1 处
         parent.insertChild(right, index + 1);
     }
@@ -145,7 +196,7 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
 
     @Override
     public V get(K key) {
-        return root.getValueBy(key);
+        return null;
     }
 
     @Override
@@ -198,10 +249,8 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
                     s = s.children[0];
                 }
                 K sKey = s.keys[0];
-                V sValue = s.values[0];
                 // 2. 替换待删除 key 和 value
                 node.keys[i] = sKey;
-                node.values[i] = sValue;
                 // 3. 删除后继 key
                 doRemove(node, node.children[i + 1], sKey, i + 1);
             }
@@ -223,6 +272,7 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
         // 被调整节点是根节点
         if (node == root) {
             if (root.keyNum == 0 && root.children != null) {
+                root.children[0].leafNode = null;
                 root = root.children[0];
             }
             return;
@@ -234,14 +284,12 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
         if (leftSibling != null && leftSibling.keyNum > MIN_KEY_NUM) {
             // 把父节点的 key 和 value 移动到子节点
             K key = parent.keys[index - 1];
-            V value = parent.values[index - 1];
-            node.put(key, 0, value);
+            node.put(key, 0);
             // 如果左孩子不是叶子节点
             if (!leftSibling.leaf) {
                 node.insertChild(leftSibling.removeMostRightNode(), 0);
             }
             // 父节点被旋转下去的 key 替换为左孩子中最右边的 key
-            parent.values[index - 1] = leftSibling.removeMostRightValue();
             parent.keys[index - 1] = leftSibling.removeMostRightKey();
             return;
         }
@@ -249,14 +297,12 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
         if (rightSibling != null && rightSibling.keyNum > MIN_KEY_NUM) {
             // 把父节点的 key 和 value 移动到子节点
             K key = parent.keys[index];
-            V value = parent.values[index];
-            node.put(key, node.keyNum, value);
+            node.put(key, node.keyNum);
             // 如果右孩子不是叶子节点
             if (!rightSibling.leaf) {
                 node.insertChild(rightSibling.removeMostLeftNode(), node.keyNum + 1);
             }
             // 父节点被旋转下去的 key 替换为右孩子孩子中最左边的 key
-            parent.values[index] = rightSibling.removeMostLeftValue();
             parent.keys[index] = rightSibling.removeMostLeftKey();
             return;
         }
@@ -264,16 +310,14 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
         if (leftSibling != null) {
             // 向左合并
             parent.removeNode(index);
-            V v = parent.removeValue(index - 1);
             K k = parent.removeKey(index - 1);
-            leftSibling.put(k, leftSibling.keyNum, v);
+            leftSibling.put(k, leftSibling.keyNum);
             node.moveToTarget(leftSibling);
         } else {
             // 向自己合并
             parent.removeNode(index + 1);
-            V v = parent.removeValue(index);
             K k = parent.removeKey(index);
-            node.put(k, node.keyNum, v);
+            node.put(k, node.keyNum);
             assert rightSibling != null;
             rightSibling.moveToTarget(node);
         }
@@ -291,19 +335,20 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
         return index >= node.keyNum || node.keys[index].compareTo(key) != 0;
     }
 
-    public BTree() {
+    public BPlusTree() {
         this(2);
     }
 
-    public BTree(int degree) {
+    public BPlusTree(int degree) {
         this.degree = degree;
         this.root = new Node<>(degree);
         MIN_KEY_NUM = degree - 1;
         MAX_KEY_NUM = 2 * degree - 1;
+        this.sentinel = new LeafNode<>(null, null, null, null);
     }
 
     /**
-     * 节点类
+     * 索引节点类
      *
      * @param <K> 关键字
      * @param <V> 值
@@ -313,10 +358,6 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
          * 关键字
          */
         K[] keys;
-        /**
-         * 值
-         */
-        V[] values;
         /**
          * 孩子
          */
@@ -333,6 +374,10 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
          * 最小度树
          */
         int degree;
+        /**
+         * 聊表中的数据节点
+         */
+        LeafNode<K, V> leafNode;
 
         /**
          * 1.遍历 keys
@@ -366,49 +411,15 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
         }
 
         /**
-         * 通过 key 获取 value
-         *
-         * @param key 节点 key
-         * @return 节点value, 没找到返回null
-         */
-        V getValueBy(K key) {
-            int i = 0;
-            while (i < keyNum) {
-                int comparedTo = keys[i].compareTo(key);
-                if (comparedTo == 0) {
-                    return values[i];
-                }
-                if (comparedTo > 0) {
-                    break;
-                }
-                i++;
-            }
-            return children[i].getValueBy(key);
-        }
-
-        /**
          * 向指定 keys 中插入一个 key
          *
          * @param key   被插入 key
          * @param index 插入位置
-         * @param value 被插入的值
          */
-        void put(K key, int index, V value) {
+        void put(K key, int index) {
             System.arraycopy(keys, index, keys, index + 1, keyNum - index);
             keys[index] = key;
-            System.arraycopy(values, index, values, index + 1, keyNum - index);
-            values[index] = value;
             keyNum++;
-        }
-
-        /**
-         * 更新 key 的 value
-         *
-         * @param i     key 和 value 在节点中的索引
-         * @param value 新值
-         */
-        void set(int i, V value) {
-            values[i] = value;
         }
 
         /**
@@ -437,18 +448,6 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
         }
 
         /**
-         * 通过 index 删除 value
-         *
-         * @param index value 在 values 中的索引
-         * @return 被删除的 value
-         */
-        V removeValue(int index) {
-            V value = values[index];
-            System.arraycopy(values, index + 1, values, index, keyNum - 1 - index);
-            return value;
-        }
-
-        /**
          * 删除 keys 最左边的 key
          *
          * @return 被删除的 key
@@ -458,30 +457,12 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
         }
 
         /**
-         * 删除 values 最左边的 value
-         *
-         * @return 被删除的 value
-         */
-        V removeMostLeftValue() {
-            return removeValue(0);
-        }
-
-        /**
          * 删除 keys 最左边的 key
          *
          * @return 被删除的 key
          */
         K removeMostRightKey() {
             return removeKey(keyNum - 1);
-        }
-
-        /**
-         * 删除 values 最右边的 value
-         *
-         * @return 被删除的 value
-         */
-        V removeMostRightValue() {
-            return removeValue(keyNum);
         }
 
         /**
@@ -545,11 +526,9 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
                 for (int i = 0; i <= keyNum; i++) {
                     target.children[start + i] = children[i];
                 }
-//                System.arraycopy(children, 0, target.children, target.keyNum, children.length - target.keyNum);
             }
             for (int i = 0; i < keyNum; i++) {
                 target.keys[target.keyNum] = keys[i];
-                target.values[target.keyNum] = values[i];
                 target.keyNum++;
             }
         }
@@ -566,8 +545,41 @@ public class BTree<K extends Comparable<K>, V> implements Tree<K, V> {
             this.children = (Node<K, V>[]) new Node<?, ?>[2 * degree];
             // 关键字数比孩子少1
             this.keys = (K[]) new Comparable[2 * degree - 1];
-            // 关键字数比孩子少1
-            this.values = (V[]) new Object[2 * degree - 1];
+        }
+    }
+
+    /**
+     * 叶子节点
+     *
+     * @param <K> 叶子节点的 key
+     * @param <V> 叶子节点的 value
+     */
+    private static class LeafNode<K, V> {
+        /**
+         * 前一个节点
+         */
+        LeafNode<K, V> prev;
+
+        /**
+         * 后一个节点
+         */
+        LeafNode<K, V> next;
+
+        /**
+         * 节点 key
+         */
+        K key;
+
+        /**
+         * 节点value
+         */
+        V value;
+
+        public LeafNode(LeafNode<K, V> prev, LeafNode<K, V> next, K key, V value) {
+            this.prev = prev;
+            this.next = next;
+            this.key = key;
+            this.value = value;
         }
     }
 }

@@ -84,14 +84,12 @@ public class BinarySearchTree<K extends Comparable<K>, V> extends AbstractTree<K
         while (node != null) {
             parent = node;
             int comparedTo = key.compareTo(node.key);
-            switch (comparedTo) {
-                case -1 -> node = node.left;
-                case 0 -> {
-                    node.value = value;
-                    return;
-                }
-                case 1 -> node = node.right;
-                default -> throw new IllegalStateException("state: " + comparedTo);
+            if (comparedTo == 0) {
+                node.value = value;
+            } else if (comparedTo > 0) {
+                node = node.right;
+            } else {
+                node = node.left;
             }
         }
         // 如果找到parent为null,说明树是空的

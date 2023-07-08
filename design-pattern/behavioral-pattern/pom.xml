@@ -18,7 +18,8 @@
         <module>observer-pattern</module>
         <module>mediator-pattern</module>
         <module>memo-pattern</module>
-        <module>state-pattern</module>
+        <module>strategy-pattern</module>
+        <module>strategy-pattern</module>
     </modules>
 
     <packaging>pom</packaging>

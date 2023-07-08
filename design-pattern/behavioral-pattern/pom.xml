@@ -22,6 +22,7 @@
         <module>strategy-pattern</module>
         <module>teamplate-method-pattern</module>
         <module>null-class-pattern</module>
+        <module>visitor-pattern</module>
     </modules>
 
     <packaging>pom</packaging>

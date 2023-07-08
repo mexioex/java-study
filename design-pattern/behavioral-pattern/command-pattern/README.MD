@@ -7,5 +7,5 @@ receiver 接受命令,调用命令执行,且 receiver 可以切换不同的命�
 
 - Undo/Redo operation: 命令行模式允许将命令对象存储在队列中,实现撤销或重做
 - Composite Command 组合命令: 由简单命令组合成复杂命令,这种方式可以通过面向对象的方式构建宏
-- The asynchronous method invocation 一部方法调用: 命令模式用于实现多线程,命令对象可以在后台以线程单独允许,
+- The asynchronous design invocation 一部方法调用: 命令模式用于实现多线程,命令对象可以在后台以线程单独允许,
   java.lang.Runnable就是一个命令接口

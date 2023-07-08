@@ -1,7 +1,7 @@
 package degisn.pattern.state;
 
 /**
- * // TODO:
+ * 开心状态类
  *
  * @author mexioex
  * @date 2023-07-08
